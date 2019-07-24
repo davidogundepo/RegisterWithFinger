@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     TextView ConfirmFingerMatch, ScannerStatus;
 
+    String UserEmail;
+
     TextView Strin;
 
     String LeftThumbFirst, LeftThumbConfirmed;
@@ -76,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int SCAN_LEFT_INDEX_FINGER = 1;
     private static final int SCAN_RIGHT_THUMB_FINGER = 2;
     private static final int SCAN_RIGHT_INDEX_FINGER = 3;
-    private byte[] bytesObjectLeftThumb, bytesObjectLeftIndex, bytesObjectRightThumb, bytesObjectRightIndex;
+    private byte[] bytesObjectLeftThumb;
+    private byte[] bytesObjectLeftIndex;
+    private byte[] bytesObjectRightThumb;
+    private byte[] bytesObjectRightIndex;
 
     StringBuilder sb;
 
@@ -128,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
         quantumElevation = new AlertDialog.Builder(MainActivity.this);
 
     }
+
+
 
 
     public void onBackPressed() {
@@ -365,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
     Handler printLeftIndexHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            byte [] image_two;
+            byte [] image;
             String errorMessage = "empty";
             int status = msg.getData().getInt("status");
             Intent intent = new Intent();
@@ -377,10 +384,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                image_two = msg.getData().getByteArray("img");
-                bitmapLeftThumb = BitmapFactory.decodeByteArray(image_two, 0, image_two.length);
+                image = msg.getData().getByteArray("img");
+                bitmapLeftIndex = BitmapFactory.decodeByteArray(image, 0, Objects.requireNonNull(image).length);
                 LeftIndexImage.setImageBitmap(bitmapLeftIndex);
-                intent.putExtra("img", image_two);
+                intent.putExtra("img", image);
                 ConfirmFingerMatch.setText("Fingerprint captured Left Index");
 
 //                LeftThumbFirst = ConfirmFingerMatch.getText().toString();
@@ -393,8 +400,9 @@ public class MainActivity extends AppCompatActivity {
                 //   try {
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
                 bitmapLeftIndex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                bytesObjectLeftIndex = baos.toByteArray();
+                byte[] bytesObjectLeftIndex = baos.toByteArray();
                 LeftIndexFirst = Base64.encodeToString(bytesObjectLeftIndex, Base64.DEFAULT);
 
 //                probeLeftIndexTemplate = new FingerprintTemplate()
@@ -633,7 +641,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 image = msg.getData().getByteArray("img");
-                bitmapLeftThumb = BitmapFactory.decodeByteArray(image, 0, image.length);
+                bitmapRightThumb = BitmapFactory.decodeByteArray(image, 0, image.length);
                 RightThumbImage.setImageBitmap(bitmapRightThumb);
                 intent.putExtra("img", image);
                 ConfirmFingerMatch.setText("Fingerprint captured Right Thumb");
@@ -706,7 +714,7 @@ public class MainActivity extends AppCompatActivity {
                     ScannerStatus.setText("Fingerprint Successfully Captured");
                     break;
                 case Status.ERROR:
-                    ScannerStatus.setText("Error");
+                    ScannerStatus.setText("No Fingerprint Reader Inserted");
                     break;
                 default:
                     ScannerStatus.setText(String.valueOf(status));
@@ -834,7 +842,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 image = msg.getData().getByteArray("img");
-                bitmapLeftThumb = BitmapFactory.decodeByteArray(image, 0, image.length);
+                bitmapRightIndex = BitmapFactory.decodeByteArray(image, 0, image.length);
                 RightIndexImage.setImageBitmap(bitmapRightIndex);
                 intent.putExtra("img", image);
                 ConfirmFingerMatch.setText("Fingerprint captured Right Index");
@@ -934,7 +942,7 @@ public class MainActivity extends AppCompatActivity {
                     ScannerStatus.setText("Fingerprint Successfully Captured");
                     break;
                 case Status.ERROR:
-                    ScannerStatus.setText("Error");
+                    ScannerStatus.setText("No Fingerprint Reader Inserted");
                     break;
                 default:
                     ScannerStatus.setText(String.valueOf(status));
@@ -1078,7 +1086,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void  LeftThumbCapture (View view) {
 
-        fingerprint.scan(this, printLeftThumbHandler, updateLeftThumbHandler);
+//        fingerprint.scan(this, printLeftThumbHandler, updateLeftThumbHandler);
 
 //        Intent intent = new Intent(this, ScanActivity.class);
 //        startActivityForResult(intent, SCAN_LEFT_THUMB_FINGER);
@@ -1086,7 +1094,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void  LeftIndexCapture (View view) {
 
-        fingerprint.scan(this, printLeftIndexHandler, updateLeftIndexHandler);
+//        fingerprint.scan(this, printLeftIndexHandler, updateLeftIndexHandler);
 
 //        Intent intent = new Intent(this, ScanActivity.class);
 //        startActivityForResult(intent, SCAN_LEFT_INDEX_FINGER);
@@ -1151,9 +1159,9 @@ public class MainActivity extends AppCompatActivity {
 
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                        bitmapLeftThumb.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                        bytesObjectLeftThumb = baos.toByteArray();
-                        LeftThumbFirst = Base64.encodeToString(bytesObjectLeftThumb, Base64.DEFAULT);
+                        bitmapLeftIndex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                        bytesObjectLeftIndex = baos.toByteArray();
+                        LeftThumbFirst = Base64.encodeToString(bytesObjectLeftIndex, Base64.DEFAULT);
 
 //                        probeLeftThumbTemplate = new FingerprintTemplate()
 //                                .dpi(500).create(bytesObjectLeftThumb);
@@ -1221,13 +1229,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void  saveToDB (View view) {
 
-            if (LeftThumbImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.thumb_left).getConstantState() ||
-                LeftIndexImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.index_left).getConstantState() ||
+        UserEmail = Email.getText().toString();
+
+        if (
+//                LeftThumbImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.thumb_left).getConstantState() ||
+//                LeftIndexImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.index_left).getConstantState() ||
                 RightThumbImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.thumb_right).getConstantState() ||
                 RightIndexImage.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.index_right).getConstantState())
             {
 
                 Toast toast = Toast.makeText(this, "Please, capture the remaining fingerprint(s)", Toast.LENGTH_LONG);
+                toast.show();
+            }
+            else if (!Email.getText().toString().contains(".")) {
+                Toast toast = Toast.makeText(this, "The Email address is invalid. No '.' sign", Toast.LENGTH_LONG);
                 toast.show();
             }
             else if (Email.getText().toString().isEmpty()) {
@@ -1255,12 +1270,13 @@ public class MainActivity extends AppCompatActivity {
                                             break;
                                         default:
                                             Email.setText("");
-                                            LeftThumbImage.setImageDrawable(getDrawable(R.drawable.thumb_left));
-                                            LeftIndexImage.setImageDrawable(getDrawable(R.drawable.index_left));
+//                                            LeftThumbImage.setImageDrawable(getDrawable(R.drawable.thumb_left));
+//                                            LeftIndexImage.setImageDrawable(getDrawable(R.drawable.index_left));
                                             RightThumbImage.setImageDrawable(getDrawable(R.drawable.thumb_right));
                                             RightIndexImage.setImageDrawable(getDrawable(R.drawable.index_right));
 
-                                            Toast toast = Toast.makeText(getApplicationContext(), "Thank you, user's fingerprints saved", Toast.LENGTH_LONG);
+
+                                            Toast toast = Toast.makeText(getApplicationContext(), "Thank you, " + UserEmail + "'s fingerprints are saved", Toast.LENGTH_LONG);
                                             toast.show();
                                     }
 
@@ -1288,8 +1304,8 @@ public class MainActivity extends AppCompatActivity {
                             Map<String, String> params = new HashMap<>();
 
                             params.put("email", Email.getText().toString());
-                            params.put("left_thumb_fingerprint", LeftThumbFirst);
-                            params.put("left_index_fingerprint", LeftIndexFirst);
+//                            params.put("left_thumb_fingerprint", LeftThumbFirst);
+//                            params.put("left_index_fingerprint", LeftIndexFirst);
                             params.put("right_thumb_fingerprint", RightThumbFirst);
                             params.put("right_index_fingerprint", RightIndexFirst);
 
